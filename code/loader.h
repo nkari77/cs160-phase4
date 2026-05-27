@@ -8,9 +8,18 @@
 
 using namespace std;
 
-struct Delay {
-    size_t before_index;
-    int    ms;
+enum class RecordType { ADD, QUERY, DELAY };
+
+struct Record {
+    RecordType type;
+    uint32_t   src = 0;
+    uint32_t   dst = 0;
+    int        weight = 0;
+    int        ms = 0;
+};
+
+struct ParsedTrace {
+    vector<Record> records;
 };
 
 Graph load_initial(const string& path) {
@@ -31,19 +40,10 @@ Graph load_initial(const string& path) {
     return g;
 }
 
-struct ParsedTrace {
-    vector<UpdateReq> updates;
-    vector<QueryReq>  queries;
-    vector<Delay>     delays;
-};
-
-ParsedTrace parse_updates(const string& path, uint32_t source) {
+ParsedTrace parse_updates(const string& path) {
     ifstream f(path);
     string line;
-
     ParsedTrace out;
-    uint64_t ver = 0;
-    vector<uint32_t> pending_dirty = {source};
 
     while (getline(f, line)) {
         if (line.empty()) continue;
@@ -53,16 +53,12 @@ ParsedTrace parse_updates(const string& path, uint32_t source) {
         if (tag == "ADD") {
             uint32_t s, d; int wt;
             ss >> s >> d >> wt;
-            ++ver;
-            out.updates.push_back({s, d, wt, ver});
-            pending_dirty.push_back(s);
+            out.records.push_back({RecordType::ADD, s, d, wt, 0});
         } else if (tag == "Q") {
-            ++ver;
-            out.queries.push_back({ver, pending_dirty});
-            pending_dirty.clear();
+            out.records.push_back({RecordType::QUERY});
         } else if (tag == "D") {
             int ms; ss >> ms;
-            out.delays.push_back({out.updates.size(), ms});
+            out.records.push_back({RecordType::DELAY, 0, 0, 0, ms});
         }
     }
     return out;

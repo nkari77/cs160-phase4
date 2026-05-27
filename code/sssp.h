@@ -17,7 +17,6 @@ void RunBspSsspParallel(
     uint64_t q_version,
     int nthreads)
 {
-    int n = g.adj.size();
 
     while (!frontier.empty()) {
         vector<uint32_t> next;
