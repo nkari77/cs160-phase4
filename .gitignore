@@ -1,0 +1,7 @@
+cat > /workspaces/cs160-phase4/.gitignore << 'EOF'
+code/main
+code/initial.txt
+code/updates.txt
+code/expected_queries.txt
+code/queries.out
+EOF
