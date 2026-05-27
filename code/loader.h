@@ -28,10 +28,15 @@ Graph load_initial(const string& path) {
     vector<tuple<uint32_t,uint32_t,int>> edges;
     uint32_t src, dst, maxv = 0;
     int w;
-    while (f >> src >> dst >> w) {
-        edges.emplace_back(src, dst, w);
-        if (src > maxv) maxv = src;
-        if (dst > maxv) maxv = dst;
+    string line;
+    while (getline(f, line)) {
+        if (line.empty() || line[0] == '#') continue;
+        istringstream ss(line);
+        if (ss >> src >> dst >> w) {
+            edges.emplace_back(src, dst, w);
+            if (src > maxv) maxv = src;
+            if (dst > maxv) maxv = dst;
+        }
     }
 
     Graph g(maxv + 1);
